@@ -1,10 +1,8 @@
 package com.ferri.expensestrackerapi.controller;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.ferri.expensestrackerapi.aspect.PermissionCheck;
+import com.ferri.expensestrackerapi.security.utils.Workspace;
+import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -12,24 +10,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 	@GetMapping("/all")
 	public String allAccess() {
-		return "Public Content.";
+		return "Public Content. bro";
 	}
 	
 	@GetMapping("/user")
-	@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+	@PermissionCheck(workspace = {Workspace.INDEX},read = true)
 	public String userAccess() {
-		return "User Content.";
+		return "INDEX READ.";
 	}
 
-	@GetMapping("/mod")
-	@PreAuthorize("hasRole('MODERATOR')")
+	@PostMapping("/user")
+	@PermissionCheck(workspace = {Workspace.INDEX},write = true)
 	public String moderatorAccess() {
-		return "Moderator Board.";
+		return "INDEX WRITE.";
 	}
 
-	@GetMapping("/admin")
-	@PreAuthorize("hasRole('ADMIN')")
+	@DeleteMapping("/user")
+	@PermissionCheck(workspace = {Workspace.INDEX},delete = true)
 	public String adminAccess() {
-		return "Admin Board.";
+		return "INDEX DELETE.";
 	}
 }

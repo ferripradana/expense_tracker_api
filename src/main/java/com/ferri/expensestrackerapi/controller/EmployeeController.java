@@ -1,27 +1,18 @@
 package com.ferri.expensestrackerapi.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.ferri.expensestrackerapi.aspect.PermissionCheck;
 import com.ferri.expensestrackerapi.exception.ResourceNotFoundException;
 import com.ferri.expensestrackerapi.model.Employee;
 import com.ferri.expensestrackerapi.repository.EmployeeRepository;
+import com.ferri.expensestrackerapi.security.utils.Workspace;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/")
@@ -33,14 +24,14 @@ public class EmployeeController {
 
 	// get Employees
 	@GetMapping("/employees")
-	//@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+	@PermissionCheck(workspace = {Workspace.EMPLOYEE},read = true)
 	public List<Employee> getAllEmployee() {
 		return employeeRepository.findAll();
 	}
 
 	// get Employee by id
 	@GetMapping("/employees/{id}")
-	@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+	@PermissionCheck(workspace = {Workspace.EMPLOYEE},read = true)
 	public ResponseEntity<Employee> getEmployeeById(@PathVariable(value = "id") Long employeeId)
 			throws ResourceNotFoundException {
 		Employee employee = employeeRepository.findById(employeeId)
@@ -50,14 +41,14 @@ public class EmployeeController {
 
 	// save Employee
 	@PostMapping("/employees")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PermissionCheck(workspace = {Workspace.EMPLOYEE},write = true)
 	public Employee createEmployee(@RequestBody Employee employee) {
 		return this.employeeRepository.save(employee);
 	}
 
 	// update Employee
 	@PutMapping("/employees/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PermissionCheck(workspace = {Workspace.EMPLOYEE},write = true)
 	public ResponseEntity<Employee> updateEmployee(@PathVariable(value = "id") Long employeeId,
 			@Valid @RequestBody Employee employeeDetails) throws ResourceNotFoundException {
 		Employee employee = employeeRepository.findById(employeeId)
@@ -71,7 +62,7 @@ public class EmployeeController {
 
 	// delete Employee
 	@DeleteMapping("/employees/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PermissionCheck(workspace = {Workspace.EMPLOYEE},delete = true)
 	public Map<String, Boolean> deleteEmployee(@PathVariable(value = "id") Long employeeId)
 			throws ResourceNotFoundException {
 		Employee employee = employeeRepository.findById(employeeId)
